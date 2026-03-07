@@ -134,7 +134,17 @@ registrar(dni);
 
 function onScanSuccess(decodedText){
 
+if(bloqueado){
+return;
+}
+
+bloqueado=true;
+
 registrar(decodedText);
+
+setTimeout(function(){
+bloqueado=false;
+},3000);
 
 }
 
@@ -143,6 +153,7 @@ let scanner = new Html5QrcodeScanner(
 {fps:10,qrbox:250}
 );
 
+  let bloqueado=false;
 scanner.render(onScanSuccess);
 
 </script>
@@ -155,3 +166,4 @@ scanner.render(onScanSuccess);
 
 
 </html>
+
