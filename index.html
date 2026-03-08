@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,49 +8,24 @@
 <style>
 
 body{
-font-family: Arial;
-background:#f2f2f2;
+font-family:Arial;
 text-align:center;
-}
-
-h2{
-background:#1a73e8;
-color:white;
-padding:10px;
+background:#f2f2f2;
 }
 
 #reader{
-width:320px;
+width:300px;
 margin:auto;
-}
-
-.panel{
-background:white;
-padding:15px;
-margin:15px;
-border-radius:10px;
-box-shadow:0px 0px 10px rgba(0,0,0,0.1);
 }
 
 input{
 padding:10px;
 font-size:18px;
-width:200px;
 }
 
 button{
 padding:10px;
 font-size:18px;
-background:#1a73e8;
-color:white;
-border:none;
-border-radius:5px;
-}
-
-#resultado{
-font-size:18px;
-font-weight:bold;
-color:green;
 }
 
 </style>
@@ -60,61 +34,53 @@ color:green;
 
 <body>
 
-<h2>ESCÁNER QR ESTUDIANTES</h2>
+<h2>ESCANER QR ESTUDIANTES</h2>
 
-<div class="panel">
-<h3>Escanear QR</h3>
 <div id="reader"></div>
-</div>
 
-<div class="panel">
+<br>
 
 <h3>Registrar por DNI</h3>
 
 <input id="dni" placeholder="Ingrese DNI">
-
 <br><br>
 
 <button onclick="registrarDNI()">Registrar</button>
 
-</div>
+<br><br>
 
-<div class="panel">
-
-<h3>Resultado</h3>
-
-<p id="resultado">Esperando escaneo...</p>
-
-</div>
+<h3 id="resultado">Esperando escaneo...</h3>
 
 <script>
 
 const API="https://script.google.com/macros/s/AKfycbzJmkZgu3hpTlqsvFPeXY9m0NnLcE-8ZDxNQ15DjypPgzLo_o0koZoMkE68fhYwNBr6/exec";
 
-function mostrarResultado(data){
+let ultimoQR="";
+let tiempoEscaneo=0;
 
-document.getElementById("resultado").innerHTML=
-
-"✔ ASISTENCIA REGISTRADA <br><br>" +
-"Nombre: "+data.nombre+"<br>"+
-"Grado: "+data.grado+"<br>"+
-"Hora: "+data.hora+"<br>"+
-"Estado: "+data.estado;
-
+function beep(){
+let audio=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+audio.play();
 }
 
 function registrar(dni){
 
-fetch(API,{
-method:"POST",
-body:JSON.stringify({dni:dni})
-})
-.then(res=>res.json())
+fetch(API+"?dni="+dni)
+
+.then(response=>response.text())
+
 .then(data=>{
-mostrarResultado(data);
+
+document.getElementById("resultado").innerHTML=data;
+
+beep();
+
 })
-.catch(err=>{
-document.getElementById("resultado").innerHTML="Error conexión";
+
+.catch(error=>{
+
+document.getElementById("resultado").innerHTML="Error de conexión";
+
 });
 
 }
@@ -123,73 +89,41 @@ function registrarDNI(){
 
 let dni=document.getElementById("dni").value;
 
-if(dni==""){
-alert("Ingrese DNI");
-return;
-}
-
 registrar(dni);
 
 }
 
-let ultimoQR="";
-let tiempoEscaneo=0;
-
-function beep(){
-let audio = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-audio.play();
-}
-
 function onScanSuccess(decodedText){
 
-let ahora = Date.now();
+let ahora=Date.now();
 
-if(decodedText === ultimoQR && (ahora - tiempoEscaneo) < 5000){
+if(decodedText==ultimoQR && (ahora-tiempoEscaneo)<5000){
 
-document.getElementById("resultado").innerHTML="⚠ YA REGISTRADO";
-
-beep();
+document.getElementById("resultado").innerHTML="YA REGISTRADO";
 
 return;
 
 }
 
-ultimoQR = decodedText;
-tiempoEscaneo = ahora;
+ultimoQR=decodedText;
 
-document.getElementById("resultado").innerHTML="Registrando...";
+tiempoEscaneo=ahora;
 
-fetch(API + "?dni=" + decodedText)
-
-.then(response => response.text())
-
-.then(data => {
-
-document.getElementById("resultado").innerHTML=data;
-
-beep();
-
-})
-
-.catch(error => {
-
-document.getElementById("resultado").innerHTML="⚠ Error de conexión";
-
-});
+registrar(decodedText);
 
 }
+
+let scanner=new Html5QrcodeScanner(
+"reader",
+{fps:10,qrbox:250}
+);
 
 scanner.render(onScanSuccess);
 
 </script>
 
 </body>
-
 </html>
 
-</body>
-
-
-</html>
 
 
