@@ -132,28 +132,53 @@ registrar(dni);
 
 }
 
+let ultimoQR="";
+let tiempoEscaneo=0;
+
+function beep(){
+let audio = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+audio.play();
+}
+
 function onScanSuccess(decodedText){
 
-if(bloqueado){
+let ahora = Date.now();
+
+if(decodedText === ultimoQR && (ahora - tiempoEscaneo) < 5000){
+
+document.getElementById("resultado").innerHTML="⚠ YA REGISTRADO";
+
+beep();
+
 return;
-}
-
-bloqueado=true;
-
-registrar(decodedText);
-
-setTimeout(function(){
-bloqueado=false;
-},3000);
 
 }
 
-let scanner = new Html5QrcodeScanner(
-"reader",
-{fps:10,qrbox:250}
-);
+ultimoQR = decodedText;
+tiempoEscaneo = ahora;
 
-  let bloqueado=false;
+document.getElementById("resultado").innerHTML="Registrando...";
+
+fetch(API + "?dni=" + decodedText)
+
+.then(response => response.text())
+
+.then(data => {
+
+document.getElementById("resultado").innerHTML=data;
+
+beep();
+
+})
+
+.catch(error => {
+
+document.getElementById("resultado").innerHTML="⚠ Error de conexión";
+
+});
+
+}
+
 scanner.render(onScanSuccess);
 
 </script>
@@ -166,4 +191,5 @@ scanner.render(onScanSuccess);
 
 
 </html>
+
 
