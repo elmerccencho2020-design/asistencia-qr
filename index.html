@@ -117,9 +117,18 @@ document.getElementById("resultado").innerHTML="Error de conexión";
 
 function registrarDNI(){
 
-let dni=document.getElementById("dni").value;
+var dni=document.getElementById("dni").value;
 
-registrar(dni);
+fetch(API+"?dni="+dni)
+.then(r=>r.text())
+.then(d=>{
+
+document.getElementById("mensaje").innerHTML=d;
+
+document.getElementById("dni").value="";
+document.getElementById("dni").focus();
+
+});
 
 }
 
@@ -154,6 +163,7 @@ scanner.render(onScanSuccess);
 
 </body>
 </html>
+
 
 
 
