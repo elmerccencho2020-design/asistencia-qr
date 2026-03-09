@@ -76,7 +76,8 @@ font-weight:bold;
 <br><br>
 
 <button onclick="registrarDNI()">Registrar</button>
-
+<div id="mensaje"></div>
+  
 <br><br>
 
 <h3 id="resultado">Esperando escaneo...</h3>
@@ -117,15 +118,20 @@ document.getElementById("resultado").innerHTML="Error de conexión";
 
 function registrarDNI(){
 
-var dni=document.getElementById("dni").value;
+var dni = document.getElementById("dni").value;
 
-fetch(API+"?dni="+dni)
-.then(r=>r.text())
-.then(d=>{
+if(dni==""){
+alert("Ingrese DNI");
+return;
+}
 
-document.getElementById("mensaje").innerHTML=d;
+fetch(API + "?dni=" + dni)
+.then(response => response.text())
+.then(data => {
 
-document.getElementById("dni").value="";
+document.getElementById("mensaje").innerHTML = data;
+
+document.getElementById("dni").value = "";
 document.getElementById("dni").focus();
 
 });
@@ -163,6 +169,7 @@ scanner.render(onScanSuccess);
 
 </body>
 </html>
+
 
 
 
